@@ -74,7 +74,7 @@ class OpenSetStandardROIHeads(StandardROIHeads):
             # Set target attributes of the sampled proposals:
             proposals_per_image = proposals_per_image[sampled_idxs]
             proposals_per_image.gt_classes = gt_classes
-            # NOTE: add iou of each proposal
+            # Add iou of each proposal
             ious, _ = match_quality_matrix.max(dim=0)
             proposals_per_image.iou = ious[sampled_idxs]
 
@@ -125,7 +125,7 @@ class OpenSetStandardROIHeads(StandardROIHeads):
             cfg, ShapeSpec(channels=in_channels,
                   height=pooler_resolution, width=pooler_resolution)
         )
-        # register output layers
+        # Register output layers
         box_predictor = build_roi_box_output_layers(cfg, box_head.output_shape)
         return {
             "box_in_features": in_features,
@@ -300,7 +300,7 @@ class ROIHeads(torch.nn.Module):
             proposals_per_image = proposals_per_image[sampled_idxs] # type: ignore
             proposals_per_image.gt_classes = gt_classes
 
-            # NOTE: add iou of each proposal
+            # Add iou of each proposal
             ious, _ = match_quality_matrix.max(dim=0)
             proposals_per_image.iou = ious[sampled_idxs]
 
@@ -410,7 +410,7 @@ class Res5ROIHeads(ROIHeads):
         #     cfg, out_channels, self.num_classes, self.cls_agnostic_bbox_reg
         # )
 
-        # unknown
+        # Unknown
         self.box_predictor = ROI_BOX_OUTPUT_LAYERS_REGISTRY.get(output_layer)(
             cfg, out_channels
         )
@@ -439,7 +439,7 @@ class Res5ROIHeads(ROIHeads):
             nDim = 4096
             self.clip_linear = nn.Sequential(nn.Linear(512, nDim), nn.ReLU(), 
                                         nn.Linear(nDim, nDim),nn.ReLU(), nn.Linear(nDim, 2048))
-            #INIT self.linear
+            # Initialize self.linear
             for m in self.clip_linear:
                 if isinstance(m, nn.Linear):
                     nn.init.kaiming_normal_(m.weight)
@@ -454,11 +454,11 @@ class Res5ROIHeads(ROIHeads):
 
             bert_nDim = 4096
             self.bert_linear = nn.Sequential(
-                nn.Linear(768, bert_nDim), nn.ReLU(),  # BERT输出768维
+                nn.Linear(768, bert_nDim), nn.ReLU(),  # BERT output is 768-dimensional
                 nn.Linear(bert_nDim, bert_nDim), nn.ReLU(),
-                nn.Linear(bert_nDim, 2048)  # 输出维度与CLIP保持一致
+                nn.Linear(bert_nDim, 2048)  # Output dimension matches CLIP
             )
-            # 初始化BERT MLP权重
+            # Initialize BERT MLP weights
             for m in self.bert_linear:
                 if isinstance(m, nn.Linear):
                     nn.init.kaiming_normal_(m.weight)
@@ -506,7 +506,7 @@ class Res5ROIHeads(ROIHeads):
     def _shared_roi_transform(self, features, boxes):
         x = self.pooler(features, boxes)
         # print('pooler:', x.size())
-        x = self.res5(x) # 16384*2048*4*4
+        x = self.res5(x) # 16384 * 2048 * 4 * 4
         # print('res5:', x.size())
         return x
 
@@ -518,18 +518,18 @@ class Res5ROIHeads(ROIHeads):
         if self.training:
             proposals = self.label_and_sample_proposals(proposals, targets)
         del targets
-        # 
+        
         proposal_boxes = [x.proposal_boxes for x in proposals]
         box_features = self._shared_roi_transform(
             [features[f] for f in self.in_features], proposal_boxes
         )
-        feature_pooled = box_features.mean(dim=[2, 3])  # pooled to 1x1 4096*2048 16384*2048
+        feature_pooled = box_features.mean(dim=[2, 3])  # pooled to 1x1 4096 * 2048 16384 * 2048
         
 
         # pred_class_logits, pred_proposal_deltas = self.box_predictor(
         #     feature_pooled
         # )
-        # unknown
+        # Unknown
         pred_class_logits, pred_proposal_deltas, s_, _ = self.box_predictor(
             feature_pooled
         )
@@ -608,7 +608,7 @@ class Res5ROIHeads(ROIHeads):
                 "dhole", "African hunting dog", "hyena", "red fox", "kit fox", 
                 "Arctic fox", "grey fox", "tabby", "tiger cat", "Persian cat", 
                 "Siamese cat", "Egyptian cat", "cougar", "lynx", "leopard", 
-                "snow leopard", "jaguar", "lion", "tiger", "cheetah", 
+                "snow leopard", "jaguar", "lion", "t tiger", "cheetah", 
                 "brown bear", "American black bear", "ice bear", "sloth bear", "mongoose", 
                 "meerkat", "tiger beetle", "ladybug", "ground beetle", "long-horned beetle", 
                 "leaf beetle", "dung beetle", "rhinoceros beetle", "weevil", "fly", 
@@ -710,7 +710,7 @@ class Res5ROIHeads(ROIHeads):
                 "screwdriver", "seat belt", "sewing machine", "shield", "shoe shop", 
                 "shoji", "shopping basket", "shopping cart", "shovel", "shower cap", 
                 "shower curtain", "ski", "ski mask", "sleeping bag", "slide rule", 
-                "sliding door", "slot", "snorkel", "snowmobile", "snowplow", 
+                "sliding door", "slot", "snorkel", "s snowmobile", "snowplow", 
                 "soap dispenser", "soccer ball", "sock", "solar dish", "sombrero", 
                 "soup bowl", "space bar", "space heater", "space shuttle", "spatula", 
                 "speedboat", "spider web", "spindle", "sports car", "spotlight", 
@@ -774,7 +774,7 @@ class Res5ROIHeads(ROIHeads):
                 for i, proposal in enumerate(proposals):
                     gt_classes = proposal.gt_classes
                     gt_classes_21_indices.extend((gt_classes == self.numclasses).nonzero(as_tuple=True)[0] + i * len(gt_classes))
-                # from box_features obtain gt_classes = 21 features                
+                # From box_features obtain gt_classes = 21 features                
                 if isinstance(gt_classes_21_indices, list):
                     gt_classes_21_indices = list(set(gt_classes_21_indices))
                 elif isinstance(gt_classes_21_indices, torch.Tensor):
@@ -785,17 +785,17 @@ class Res5ROIHeads(ROIHeads):
                 
                 valid_indices = []
                 for index in gt_classes_21_indices:
-                    if index < box_features.shape[0]:  # 检查索引是否在合法范围内
+                    if index < box_features.shape[0]:  # Check if index is within valid range
                         valid_indices.append(index)
                     else:
-                        print(f"索引 {index} 超出 box_features 维度范围，已忽略")
+                        print(f"Index {index} exceeds box_features dimension range, ignored")
                 if valid_indices:
                     valid_indices_tensor = torch.tensor(valid_indices).to(device)
                     mask[valid_indices_tensor] = True
                     selected_proposal_boxes = box_features[mask].to(device)    
                 else:
-                    # print("没有合法的索引，selected_proposal_boxes 为空")
-                    # 这里也可以根据业务逻辑赋予 selected_proposal_boxes 一个合适的默认值，比如全零张量等
+                    # print("No valid indices, selected_proposal_boxes is empty")
+                    # Here you could assign a suitable default value to selected_proposal_boxes according to business logic, such as an all-zero tensor
                     selected_proposal_boxes = torch.zeros_like(box_features[0:0]).to(device)
 
                 if len(selected_proposal_boxes) > 0:
@@ -811,7 +811,7 @@ class Res5ROIHeads(ROIHeads):
                         
 #################################################################################################################################
                         
-                        ####### 特征转换为RGB图像并显示 #######                   
+                        ####### Convert features to RGB images and display #######                   
                         
 #################################################################################################################################
                         # import matplotlib.pyplot as plt
@@ -823,13 +823,13 @@ class Res5ROIHeads(ROIHeads):
                         # rgb_features = pca.fit_transform(features)
                         # rgb_img = (rgb_features - rgb_features.min()) / (rgb_features.max() - rgb_features.min()) * 255
                         # rgb_img = rgb_img.astype(np.uint8)
-                        # plt.imshow(rgb_img.reshape(1, -1, 3))  # 如果是多个特征可以调整形状
+                        # plt.imshow(rgb_img.reshape(1, -1, 3))  # If multiple features, adjust shape
                         # plt.axis('off')
                         # plt.show()
 
                         # import seaborn as sns
 
-                        # # 计算特征间的相似度矩阵
+                        # # Calculate similarity matrix between features
                         # sim_matrix = features @ features.T
                         # plt.figure(figsize=(10, 8))
                         # sns.heatmap(sim_matrix, cmap='viridis')
@@ -838,23 +838,23 @@ class Res5ROIHeads(ROIHeads):
 
 #################################################################################################################################
                         
-                        ####### 特征寻找单词 #######                   
+                        ####### Find words for features #######                   
                         
 #################################################################################################################################
 
                         similarities = torch.nn.functional.cosine_similarity(bg_features[:, None, :], text_features[None, :, :], dim=2)
-                        # 找到与每个bg_feature最相似的text_feature的索引
+                        # Find the text_feature index most similar to each bg_feature
                         most_similar_indices = similarities.argmax(dim=1)
                         # for i, index in enumerate(most_similar_indices):
-                        #     print(f"bg_feature {i} 最相似的单词是: {class_list[index]}")                                        
+                        #     print(f"bg_feature {i} most similar word: {class_list[index]}")                                        
                         word_count = {word: 0 for word in class_list}
 
-                        # 统计每个单词出现的次数
+                        # Count occurrences of each word
                         for index in most_similar_indices:
                             word = class_list[index]
                             word_count[word] += 1
 
-                        # 输出每个单词出现的次数
+                        # Output count for each word
                         for word, count in word_count.items():
                             if count > 0:
                                 print(f" {word} : {count} ")
@@ -873,12 +873,12 @@ class Res5ROIHeads(ROIHeads):
                 
 
             if self.with_text_bert and self.training:
-                # 获取 gt_classes 等于 20 的索引
+                # Get indices where gt_classes equals 20
                 gt_classes_indices = []
                 for i, proposal in enumerate(proposals):
                     gt_classes = proposal.gt_classes
                     gt_classes_indices.extend((gt_classes == self.numclasses).nonzero(as_tuple=True)[0] + i * len(gt_classes))
-                # 从 box_features 中提取 gt_classes 等于 21 的特征
+                # Extract features from box_features where gt_classes equals 21
                 
                 if isinstance(gt_classes_indices, list):
                     gt_classes_indices = list(set(gt_classes_indices))
@@ -890,10 +890,10 @@ class Res5ROIHeads(ROIHeads):
                 
                 valid_indices = []
                 for index in gt_classes_indices:
-                    if index < box_features.shape[0]:  # 检查索引是否在合法范围内
+                    if index < box_features.shape[0]:  # Check if index is within valid range
                         valid_indices.append(index)
                     else:
-                        print(f"索引 {index} 超出 box_features 维度范围，已忽略")
+                        print(f"Index {index} exceeds box_features dimension range, ignored")
                 if valid_indices:
                     valid_indices_tensor = torch.tensor(valid_indices).to(device)
                     mask[valid_indices_tensor] = True
@@ -901,8 +901,8 @@ class Res5ROIHeads(ROIHeads):
                     
                     
                 else:
-                    # print("没有合法的索引，selected_proposal_boxes 为空")
-                    # 这里也可以根据业务逻辑赋予 selected_proposal_boxes 一个合适的默认值，比如全零张量等
+                    # print("No valid indices, selected_proposal_boxes is empty")
+                    # Here you could assign a suitable default value to selected_proposal_boxes according to business logic, such as an all-zero tensor
                     selected_proposal_boxes = torch.zeros_like(box_features[0:0]).to(device)
                     
 
@@ -923,7 +923,7 @@ class Res5ROIHeads(ROIHeads):
                         
                         bert_text_features = torch.cat((padding_tensor.to(device), bert_text_features), dim=0)
                         bert_text_features = bert_text_features[:4096,:]  
-                # 融合原始特征和BERT文本编码器的特征
+                # Combine original features with BERT text encoder features
                 feature_pooled = feature_pooled + bert_text_features
 
             vae_loss_value = self.calculate_vae_loss(x_recon_mean, vae_features, mu, logvar)
@@ -1114,6 +1114,3 @@ class StandardROIHeads(ROIHeads):
                 self.test_detections_per_img,
             )
             return pred_instances
-
-
-
