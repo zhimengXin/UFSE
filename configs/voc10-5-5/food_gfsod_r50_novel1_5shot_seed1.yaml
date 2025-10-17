@@ -1,0 +1,77 @@
+_BASE_: "../Base-RCNN.yaml"
+MODEL:
+  WEIGHTS: "output/voc10-5-5/food_r50_voc_base/model_reset_remove.pth"
+  MASK_ON: False
+  BACKBONE:
+    FREEZE: False
+  RESNETS:
+    DEPTH: 50
+  RPN:
+    ENABLE_DECOUPLE: True
+    BACKWARD_SCALE: 0.0
+    FREEZE: False
+  ROI_HEADS:
+    NAME: "Res5ROIHeads"
+    ENABLE_DECOUPLE: True
+    BACKWARD_SCALE: 0.001
+    NUM_CLASSES: 21
+    NUM_KNOWN_CLASSES: 15
+    NUM_BASE_CLASSES: 10
+    FREEZE_FEAT: True
+    CLS_DROPOUT: True
+#    VIS_IOU_THRESH: 0.5
+#    NMS_THRESH_TEST: 0.5
+  ROI_BOX_HEAD:
+#    NAME: "FastRCNNSeparateConvFCHead"
+    OUTPUT_LAYERS: "FOODFastRCNNOutputLayers"
+    CLS_AGNOSTIC_BBOX_REG: True
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  MIN_SIZE_TEST: 800
+DATASETS:
+  TRAIN: ("voc_2007_trainval_all1_5shot_seed0", )
+# 3, 5 6,8,
+  TEST: ("voc_2007_test_all1",)
+SOLVER:
+  IMS_PER_BATCH: 6
+  BASE_LR: 0.02
+  STEPS: (600,1200)
+  MAX_ITER: 1000
+  CHECKPOINT_PERIOD: 500
+  WARMUP_ITERS: 0
+UPLOSS:
+  ENABLE_UPLOSS: True
+  START_ITER: 0
+  SAMPLING_METRIC: "random"   # edl_dirichlet 23  max_energy (unseen 30.89 nAP 25.77)  min_score (unseen 29.86 nAP 25.17) max_entropy (unseen 22.3 nAP 31.15)                             
+  TOPK: 6                      # random  (baseline unseen 33.98 nAP 27.28)   (VAE 34.18 28.46)  max_condition_energy (baseline 30.82 24.71) (VAE 30.39 24.78)
+  SAMPLING_RATIO: 1        # VIM (baseline 35.36 25.61) (vae 35.3 26.78)
+  ALPHA: 1.0
+  WEIGHT: 1.0
+ELOSS:
+  ENABLE_ELOSS: False
+  WEIGHT: 0.1
+HSICLOSS:
+  ENABLE_HSICLOSS: False
+ICLOSS:
+  OUT_DIM: 2048
+  QUEUE_SIZE: 32
+  IN_QUEUE_SIZE: 16
+  BATCH_IOU_THRESH: 0.5
+  QUEUE_IOU_THRESH: 0.7
+  TEMPERATURE: 0.1
+  WEIGHT: 0.1
+TEST:
+  PCB_ENABLE: True
+  PCB_MODELPATH: "ImageNetPretrained/torchvision/resnet101-5d3b4d8f.pth"
+  IMG_OUTPUT_PATH: "/home/subinyi/Users/FSOSOD/DeFRCN-main/save_fig/voc/"
+  SAVE_FIG: False
+  SCORE_THREHOLD: 0.5
+  SAVE_FEATURE_MAP: False
+TEST:
+  EVAL_PERIOD: 501
+cons_loss: False
+_ALPHA: 0.95
+background_loss: True
+VAE: True
+image_clip: True
+
