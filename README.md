@@ -2,7 +2,6 @@
 
 
 
-[**Paper**](https://www.researchgate.net/publication/373451611_HSIC-based_Moving_Weight_Averaging_for_Few-Shot_Open-Set_Object_Detection)         [**Code**](https://github.com/binyisu/food)
 
 
 
@@ -82,3 +81,4 @@ If you find this repo useful, please consider citing our paper:
 ```
 
 ```
+
