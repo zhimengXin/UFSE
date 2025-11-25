@@ -79,6 +79,12 @@ bash run_voc_AR.sh
 If you find this repo useful, please consider citing our paper:
 
 ```
-
+@ARTICLE{UFSE,
+  author={Xin, Zhimeng and Wu, Tianxu and Zou, Yixiong and Chen, Shiming and You, Xinge},
+  journal={IEEE Transactions on Multimedia}, 
+  title={Language-Inspired Unknown-Space Expansion for Few-Shot Open-Set Detection}, 
+  year={2025},
+  }
 ```
+
 
